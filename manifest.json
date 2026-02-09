@@ -1,0 +1,11 @@
+{
+	"id": "page-flip-sounds",
+	"name": "Page Flip Sounds",
+	"version": "1.0.0",
+	"minAppVersion": "0.15.0",
+	"description": "Play page flip sounds when changing tabs or opening or creating new files.",
+	"author": "Obsidian",
+	"authorUrl": "https://obsidian.md",
+	"fundingUrl": "https://obsidian.md/pricing",
+	"isDesktopOnly": true
+}
