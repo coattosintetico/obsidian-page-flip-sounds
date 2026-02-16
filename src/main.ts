@@ -113,6 +113,11 @@ export default class PageFlipSoundsPlugin extends Plugin {
                     this.isInternalLinkNavigation = false;
                 }, 200);
             }
+
+            // Checkbox toggle in reading view
+            if (this.settings.onCheckbox && target instanceof HTMLInputElement && target.matches("input.task-list-item-checkbox")) {
+                playSound("checkbox", this.settings.volume);
+            }
         }, { capture: true });
 
         // Hook into daily notes commands

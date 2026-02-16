@@ -10,6 +10,7 @@ export interface PageFlipSoundsSettings {
     onSwitchTab: boolean;
     onInternalLink: boolean;
     onDailyNote: boolean;
+    onCheckbox: boolean;
     customSoundsFolder: string;
 }
 
@@ -21,6 +22,7 @@ export const DEFAULT_SETTINGS: PageFlipSoundsSettings = {
     onSwitchTab: true,
     onInternalLink: true,
     onDailyNote: true,
+    onCheckbox: true,
     customSoundsFolder: "",
 };
 
@@ -110,11 +112,21 @@ export class PageFlipSoundsSettingTab extends PluginSettingTab {
                     await this.plugin.saveSettings();
                 }));
 
+        new Setting(containerEl)
+            .setName("Checkbox toggle")
+            .setDesc("Play sound when toggling checkboxes in reading view")
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.onCheckbox)
+                .onChange(async (value) => {
+                    this.plugin.settings.onCheckbox = value;
+                    await this.plugin.saveSettings();
+                }));
+
         containerEl.createEl("h3", { text: "Custom sounds" });
 
         new Setting(containerEl)
             .setName("Custom sounds folder")
-            .setDesc("Path to a folder in your vault containing custom sounds (leave empty to use built-in sounds). Folder should contain 'page-flip' and 'new-note' subfolders with .ogg files.")
+            .setDesc("Path to a folder in your vault containing custom sounds (leave empty to use built-in sounds). Folder should contain 'page-flip', 'new-note', and/or 'checkbox' subfolders with .ogg files.")
             .addText(text => text
                 .setPlaceholder("e.g., assets/sounds")
                 .setValue(this.plugin.settings.customSoundsFolder)
@@ -146,6 +158,15 @@ export class PageFlipSoundsSettingTab extends PluginSettingTab {
                 .setButtonText("Test")
                 .onClick(() => {
                     playSound("new-note", this.plugin.settings.volume);
+                }));
+
+        new Setting(containerEl)
+            .setName("Test checkbox sound")
+            .setDesc("Play a random sound from the checkbox pool")
+            .addButton(button => button
+                .setButtonText("Test")
+                .onClick(() => {
+                    playSound("checkbox", this.plugin.settings.volume);
                 }));
     }
 }

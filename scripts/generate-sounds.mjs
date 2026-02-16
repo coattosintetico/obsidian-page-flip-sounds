@@ -24,6 +24,7 @@ function fileToBase64(filePath) {
 
 const pageFlipFiles = getOggFiles(join(soundsDir, 'page-flip'));
 const newNoteFiles = getOggFiles(join(soundsDir, 'new-note'));
+const checkboxFiles = getOggFiles(join(soundsDir, 'checkbox'));
 
 const pageFlipSounds = pageFlipFiles.map(f =>
     fileToBase64(join(soundsDir, 'page-flip', f))
@@ -31,6 +32,10 @@ const pageFlipSounds = pageFlipFiles.map(f =>
 
 const newNoteSounds = newNoteFiles.map(f =>
     fileToBase64(join(soundsDir, 'new-note', f))
+);
+
+const checkboxSounds = checkboxFiles.map(f =>
+    fileToBase64(join(soundsDir, 'checkbox', f))
 );
 
 const output = `// AUTO-GENERATED FILE - DO NOT EDIT
@@ -43,9 +48,14 @@ ${pageFlipSounds.map(s => `    "${s}",`).join('\n')}
 export const NEW_NOTE_SOUNDS: string[] = [
 ${newNoteSounds.map(s => `    "${s}",`).join('\n')}
 ];
+
+export const CHECKBOX_SOUNDS: string[] = [
+${checkboxSounds.map(s => `    "${s}",`).join('\n')}
+];
 `;
 
 writeFileSync(outputFile, output);
 console.log(`Generated ${outputFile}`);
 console.log(`  - ${pageFlipSounds.length} page-flip sounds`);
 console.log(`  - ${newNoteSounds.length} new-note sounds`);
+console.log(`  - ${checkboxSounds.length} checkbox sounds`);

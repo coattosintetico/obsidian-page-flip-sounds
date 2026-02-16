@@ -1,11 +1,12 @@
 import { Notice, Vault } from "obsidian";
-import { PAGE_FLIP_SOUNDS, NEW_NOTE_SOUNDS } from "./sounds.generated";
+import { PAGE_FLIP_SOUNDS, NEW_NOTE_SOUNDS, CHECKBOX_SOUNDS } from "./sounds.generated";
 
-export type SoundPool = "page-flip" | "new-note";
+export type SoundPool = "page-flip" | "new-note" | "checkbox";
 
 interface CustomSounds {
     pageFlip: string[];
     newNote: string[];
+    checkbox: string[];
 }
 
 let customSounds: CustomSounds | null = null;
@@ -34,9 +35,12 @@ export async function loadCustomSounds(vault: Vault, folderPath: string): Promis
     const pageFlipDir = `${folderPath}/page-flip`;
     const newNoteDir = `${folderPath}/new-note`;
 
+    const checkboxDir = `${folderPath}/checkbox`;
+
     const loaded: CustomSounds = {
         pageFlip: [],
         newNote: [],
+        checkbox: [],
     };
 
     let warnings: string[] = [];
@@ -83,6 +87,27 @@ export async function loadCustomSounds(vault: Vault, folderPath: string): Promis
         warnings.push(`Error loading new-note sounds: ${e}`);
     }
 
+    try {
+        const checkboxFolder = vault.getFolderByPath(checkboxDir);
+        if (checkboxFolder) {
+            const files = checkboxFolder.children
+                .filter(f => f.name.endsWith('.ogg'))
+                .sort((a, b) => a.name.localeCompare(b.name));
+
+            for (const file of files) {
+                if ('extension' in file) {
+                    const data = await vault.readBinary(file as any);
+                    const base64 = arrayBufferToBase64(data);
+                    loaded.checkbox.push(base64ToDataUrl(base64));
+                }
+            }
+        } else {
+            warnings.push(`checkbox folder not found at ${checkboxDir}`);
+        }
+    } catch (e) {
+        warnings.push(`Error loading checkbox sounds: ${e}`);
+    }
+
     if (warnings.length > 0) {
         new Notice(`Page Flip Sounds: ${warnings.join("; ")}. Falling back to built-in sounds.`);
     }
@@ -112,11 +137,17 @@ function getSoundUrl(pool: SoundPool): string | undefined {
         }
         const base64 = pickRandom(PAGE_FLIP_SOUNDS);
         return base64 ? base64ToDataUrl(base64) : undefined;
-    } else {
+    } else if (pool === "new-note") {
         if (customSounds && customSounds.newNote.length > 0) {
             return pickRandom(customSounds.newNote);
         }
         const base64 = pickRandom(NEW_NOTE_SOUNDS);
+        return base64 ? base64ToDataUrl(base64) : undefined;
+    } else {
+        if (customSounds && customSounds.checkbox.length > 0) {
+            return pickRandom(customSounds.checkbox);
+        }
+        const base64 = pickRandom(CHECKBOX_SOUNDS);
         return base64 ? base64ToDataUrl(base64) : undefined;
     }
 }
