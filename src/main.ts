@@ -10,6 +10,7 @@ export default class PageFlipSoundsPlugin extends Plugin {
     private recentlyCreatedFiles: Set<string> = new Set();
     private isInternalLinkNavigation = false;
     private isDailyNoteNavigation = false;
+    private lastLeafChangeSoundTime = 0;
     async onload() {
         await this.loadSettings();
 
@@ -48,6 +49,13 @@ export default class PageFlipSoundsPlugin extends Plugin {
 
                 // No change in leaf or file, skip
                 if (!isNewLeaf && !isNewFile) return;
+
+                // Debounce: side-panel clicks can fire two rapid
+                // active-leaf-change events (focus switch then file
+                // resolve). Suppress the second one.
+                const now = Date.now();
+                if (now - this.lastLeafChangeSoundTime < 200) return;
+                this.lastLeafChangeSoundTime = now;
 
                 // Skip file-resolve events on the same leaf. Plugins like
                 // Calendar fire two leaf changes: first with no file (view
