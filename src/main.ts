@@ -10,7 +10,6 @@ export default class PageFlipSoundsPlugin extends Plugin {
     private recentlyCreatedFiles: Set<string> = new Set();
     private isInternalLinkNavigation = false;
     private isDailyNoteNavigation = false;
-
     async onload() {
         await this.loadSettings();
 
@@ -42,12 +41,20 @@ export default class PageFlipSoundsPlugin extends Plugin {
                 const filePath = view?.file?.path ?? null;
                 const isNewLeaf = leaf !== this.lastActiveLeaf;
                 const isNewFile = filePath !== this.lastFilePath;
+                const prevFilePath = this.lastFilePath;
 
                 this.lastActiveLeaf = leaf;
                 this.lastFilePath = filePath;
 
                 // No change in leaf or file, skip
                 if (!isNewLeaf && !isNewFile) return;
+
+                // Skip file-resolve events on the same leaf. Plugins like
+                // Calendar fire two leaf changes: first with no file (view
+                // still loading), then with the resolved file. The sound
+                // already played on the first (new-leaf) event, so suppress
+                // the second (same-leaf, file-resolved) event.
+                if (!isNewLeaf && isNewFile && prevFilePath === null) return;
 
                 // Check if this is a recently created file
                 if (filePath && this.recentlyCreatedFiles.has(filePath)) {
@@ -78,9 +85,9 @@ export default class PageFlipSoundsPlugin extends Plugin {
 
                 // Tab switch (leaf changed) or opening note via other means
                 if (isNewLeaf && this.settings.onSwitchTab) {
-                    playSound("page-flip", this.settings.volume);
+                        playSound("page-flip", this.settings.volume);
                 } else if (isNewFile && this.settings.onOpenNote) {
-                    playSound("page-flip", this.settings.volume);
+                        playSound("page-flip", this.settings.volume);
                 }
             })
         );

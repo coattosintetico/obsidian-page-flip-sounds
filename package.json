@@ -26,5 +26,9 @@
 	},
 	"dependencies": {
 		"obsidian": "latest"
+	},
+	"volta": {
+		"node": "24.13.0",
+		"npm": "11.8.0"
 	}
 }
