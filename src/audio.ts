@@ -16,9 +16,17 @@ function base64ToDataUrl(base64: string): string {
     return `data:audio/ogg;base64,${base64}`;
 }
 
-function pickRandom<T>(arr: T[]): T | undefined {
+const poolIndices: Record<SoundPool, number> = {
+    "page-flip": 0,
+    "new-note": 0,
+    "checkbox": 0,
+};
+
+function pickSequential<T>(pool: SoundPool, arr: T[]): T | undefined {
     if (arr.length === 0) return undefined;
-    return arr[Math.floor(Math.random() * arr.length)];
+    const index = poolIndices[pool] % arr.length;
+    poolIndices[pool] = index + 1;
+    return arr[index];
 }
 
 export async function loadCustomSounds(vault: Vault, folderPath: string): Promise<void> {
@@ -133,21 +141,21 @@ export function clearCustomSounds(): void {
 function getSoundUrl(pool: SoundPool): string | undefined {
     if (pool === "page-flip") {
         if (customSounds && customSounds.pageFlip.length > 0) {
-            return pickRandom(customSounds.pageFlip);
+            return pickSequential(pool,customSounds.pageFlip);
         }
-        const base64 = pickRandom(PAGE_FLIP_SOUNDS);
+        const base64 = pickSequential(pool,PAGE_FLIP_SOUNDS);
         return base64 ? base64ToDataUrl(base64) : undefined;
     } else if (pool === "new-note") {
         if (customSounds && customSounds.newNote.length > 0) {
-            return pickRandom(customSounds.newNote);
+            return pickSequential(pool,customSounds.newNote);
         }
-        const base64 = pickRandom(NEW_NOTE_SOUNDS);
+        const base64 = pickSequential(pool,NEW_NOTE_SOUNDS);
         return base64 ? base64ToDataUrl(base64) : undefined;
     } else {
         if (customSounds && customSounds.checkbox.length > 0) {
-            return pickRandom(customSounds.checkbox);
+            return pickSequential(pool,customSounds.checkbox);
         }
-        const base64 = pickRandom(CHECKBOX_SOUNDS);
+        const base64 = pickSequential(pool,CHECKBOX_SOUNDS);
         return base64 ? base64ToDataUrl(base64) : undefined;
     }
 }
